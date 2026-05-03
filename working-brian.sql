@@ -1,18 +1,3 @@
-DELIMITER //
-CREATE TRIGGER insert_lab_member_type
-AFTER INSERT ON LAB_MEMBER
-FOR EACH ROW
-BEGIN
-	IF NEW.TYPE = 'Student' THEN
-		INSERT INTO student (MID, SID, LEVEL, MAJOR)
-        VALUES (NEW.MID, NULL, NULL, NULL);
-    ELSEIF NEW.TYPE = 'Faculty' THEN
-		INSERT INTO faculty (MID, DEPARTMENT)
-        VALUES (NEW.MID, NULL);
-	ELSE
-		INSERT INTO collaborator (MID, AFFILIATION, CV)
-        VALUES (NEW.MID, NULL, NULL);
-    END IF;
-END //
-
-DELIMITER ;
+UPDATE lab_member
+SET mentor = '364'
+WHERE mid = '648';

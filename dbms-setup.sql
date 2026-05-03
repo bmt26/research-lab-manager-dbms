@@ -109,6 +109,7 @@ BEGIN
 	END IF;
 END //
 
+/*
 CREATE TRIGGER insert_lab_member_type
 AFTER INSERT ON LAB_MEMBER
 FOR EACH ROW
@@ -124,5 +125,6 @@ BEGIN
         VALUES (NEW.MID, NULL, NULL);
     END IF;
 END //
+*/
 
 DELIMITER ;
