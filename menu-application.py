@@ -51,7 +51,24 @@ def query_db(query):
 
         conn.close()
     except Exception as e:
-        print("Error, could not connect to database:", e)
+        print("Error:", e)
+
+# Test function to view all Lab Members
+def insert_db(query):
+    try:
+        conn = connect_db()
+        cursor = conn.cursor()
+        cursor.execute(query);
+
+        for row in cursor.fetchall():
+            print(row)
+
+        db.commit()
+        print(cursor.rowcount, "record inserted.")
+
+        conn.close()
+    except Exception as e:
+        print("Error:", e)
 
 def query_table_format(query):
     try:
@@ -73,7 +90,6 @@ def create_test():
     tables = ['Student', 'Faculty', 'Collaborator']
     query_result = [None] * len(tables)
     for i in range(len(tables)):
-        print(tables[i], end=": ")
         query_result[i] = query_table_format(
             """SELECT COLUMN_NAME
                FROM (SELECT COLUMN_NAME,
@@ -86,13 +102,36 @@ def create_test():
             """
         )
 
-        print("(" + query_result[i][0], end="")
-        for row in query_result[i][1:]:
-            print(", " + row, end="")
+    while True:
+        print("Following the format to create a student, faculty, or collaborator entry:")
+        for i in range(len(query_result)):
+            print(tables[i], end=": ")
+            print("(" + query_result[i][0], end="")
+            for j in query_result[i][1:]:
+                print(", " + j, end="")
+            print(")")
+        print("Or type EXIT to exit.")
 
-        print(")")
+        choice = input("Enter: ")
+        choice_split = choice.split(", ")
+        if choice == "EXIT":
+            sys.exit()
+        elif choice_split[3] == "\"Student\"":
+            print("working")
+            lab_member_values= choice_split[0]
+            for i in range(6):
+                lab_member_values += ", " +choice_split[i+1]
+            lab_member_values += ")"
+            student_values=choice_split[0]
+            for i in range(3):
+                student_values += ", " +choice_split[i+7]
 
-
+            query = "INSERT INTO lab_member VALUES" + lab_member_values + ";"
+            print(query)
+            query_db(query)
+            query = "INSERT INTO student VALUES" + student_values + ";"
+            print(query)
+            query_db(query)
 
 
 
