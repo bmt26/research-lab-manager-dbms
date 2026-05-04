@@ -43,3 +43,23 @@ VALUES
 (477, 'Predicting Portein Folds', '2026-02-10', null, 74, 715),
 (236, 'Halting Problem Solved', '2026-03-15', null, 480, 518),
 (769, 'Room-Temperature Superconductors', '2026-04-11', null, 100, 843);
+
+# WORKS INSERTS
+INSERT INTO works (PID, MID, ROLE, HOURS)
+VALUES
+(762, 253, 'Programmer', 14),
+(769, 253, 'Simulator', 19),
+(236, 364, 'Programmer', 12),
+(236, 648, 'Programmer', 20),
+(477, 715, 'Leader', 36),
+(762, 984, 'Writer', 24),
+(769, 984, 'Chemist', 16),
+(236, 743, 'Writer', 26),
+(236, 518, 'Leader', 42),
+(762, 518, 'Leader', 45),
+(477, 627, 'Simulator', 28),
+(762, 846, 'Programmer', 32),
+(236, 846, 'Programmer', 16),
+(762, 374, 'Writer', 18),
+(477, 567, 'Chemist', 26),
+(769, 843, 'Leader', 38);
