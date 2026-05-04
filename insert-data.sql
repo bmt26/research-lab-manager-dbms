@@ -1,3 +1,4 @@
+# LAB MEMBER INSERTS
 # Each valid mentorship type between students, collaborators, and faculty, and one mentorship chain
 INSERT INTO lab_member (MID, NAME, JOIN_DATE, TYPE, MENTOR, M_SDATE, M_EDATE)
 VALUES
@@ -34,3 +35,11 @@ VALUES
 (743, 'Chemistry', 'Hi I am Lisa Stansa.'),
 (846, 'Computer Science', 'Hi I am Byron Henderson.'),
 (567, 'Chemistry', 'Hi I am Sarah Stevens.');
+
+# PROJECT INSERTS
+INSERT INTO project (PID, TITLE, S_DATE, E_DATE, E_DURATION, LEADER)
+VALUES
+(762, 'Solving NP-Hard Froblems', '2024-01-01', '2025-02-12', 366, 518),
+(477, 'Predicting Portein Folds', '2026-02-10', null, 74, 715),
+(236, 'Halting Problem Solved', '2026-03-15', null, 480, 518),
+(769, 'Room-Temperature Superconductors', '2026-04-11', null, 100, 843);
