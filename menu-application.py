@@ -6,6 +6,26 @@ from dotenv import load_dotenv
 # Import password
 load_dotenv()
 my_password = os.getenv("DB_PASSWORD")
+my_database = "researchlabmanager"
+
+table_titles = ["GRANT",
+                "PROJECT",
+                "WORKS",
+                "LAB_MEMBER",
+                "STUDENT",
+                "COLLABORATOR",
+                "FACULTY",
+                "USES",
+                "DEVICE",
+                "EQUIPMENT",
+                "PUBLISHES",
+                "PUBLICATION"]
+"""(lab members, students, collaborator, faculty
+     , projects,
+    equipment, device
+ grant
+ publication
+ publishes)*/"""
 
 # Connect to the Database with relevant info
 def connect_db():
@@ -13,18 +33,18 @@ def connect_db():
         host="localhost",
         user="root",
         password=my_password,
-        database="researchlabmanager"
+        database=my_database
     )
 
 def choice_wip():
     print("\nSorry, this feature is a Work In Progress.")
 
 # Test function to view all Lab Members
-def view_members():
+def query_db(query):
     try:
         conn = connect_db()
         cursor = conn.cursor()
-        cursor.execute("SELECT * FROM LAB_MEMBER");
+        cursor.execute(query);
 
         for row in cursor.fetchall():
             print(row)
@@ -32,6 +52,49 @@ def view_members():
         conn.close()
     except Exception as e:
         print("Error, could not connect to database:", e)
+
+def query_table_format(query):
+    try:
+        conn = connect_db()
+        cursor = conn.cursor()
+        cursor.execute(query);
+
+        query_result = [item[0] for item in cursor.fetchall()]
+
+        conn.close()
+        return query_result
+
+        conn.close()
+    except Exception as e:
+        print("Error:", e)
+
+# WIP
+def create_test():
+    tables = ['Student', 'Faculty', 'Collaborator']
+    query_result = [None] * len(tables)
+    for i in range(len(tables)):
+        print(tables[i], end=": ")
+        query_result[i] = query_table_format(
+            """SELECT COLUMN_NAME
+               FROM (SELECT COLUMN_NAME,
+                            MIN(CASE WHEN TABLE_NAME = 'lab_member' THEN 1 ELSE 2 END) AS table_priority,
+                            MIN(ORDINAL_POSITION)                                      AS position_priority
+                     FROM INFORMATION_SCHEMA.COLUMNS
+                     WHERE TABLE_NAME IN ('lab_member', '""" + tables[i] + """')
+                     GROUP BY COLUMN_NAME) AS C
+               ORDER BY table_priority, position_priority;
+            """
+        )
+
+        print("(" + query_result[i][0], end="")
+        for row in query_result[i][1:]:
+            print(", " + row, end="")
+
+        print(")")
+
+
+
+
 
 # Text Menu
 def main_menu():
@@ -54,6 +117,8 @@ def main_menu():
             equipment_usage_tracking()
         elif choice == "3":
             grant_publication_reporting()
+        elif choice == "test":
+            create_test()
         elif choice == "EXIT":
             sys.exit()
 
@@ -153,9 +218,9 @@ def equipment_usage_tracking():
         if choice == "0":
             break
         elif choice == "1":
-            view_members()
+            choice_wip()
         elif choice == "2":
-            other_menu()
+            choice_wip()
         elif choice == "EXIT":
             sys.exit()
 
@@ -178,9 +243,9 @@ def grant_publication_reporting():
         if choice == "0":
             break
         elif choice == "1":
-            view_members()
+            choice_wip()
         elif choice == "2":
-            other_menu()
+            choice_wip()
         elif choice == "EXIT":
             sys.exit()
 
