@@ -281,9 +281,10 @@ def display_project_status():
             else:
                 continue
 
+        print("(PID, TITLE, STATUS)")
         for row in query_db(
             f"""
-            SELECT pid, status
+            SELECT pid, title, status
             FROM project
             WHERE pid = {pid}
             """

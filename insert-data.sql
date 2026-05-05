@@ -37,12 +37,12 @@ VALUES
 (567, 'Chemistry', 'Hi I am Sarah Stevens.');
 
 # PROJECT INSERTS
-INSERT INTO project (PID, TITLE, S_DATE, E_DATE, E_DURATION, LEADER)
+INSERT INTO project (PID, TITLE, S_DATE, E_DATE, E_DURATION, STATUS, LEADER)
 VALUES
-(762, 'Solving NP-Hard Froblems', '2024-01-01', '2025-02-12', 366, 518),
-(477, 'Predicting Portein Folds', '2026-02-10', null, 74, 715),
-(236, 'Halting Problem Solved', '2026-03-15', null, 480, 518),
-(769, 'Room-Temperature Superconductors', '2026-04-11', null, 100, 843);
+(762, 'Solving NP-Hard Froblems', '2024-01-01', '2025-02-12', 366, 'Completed', 518),
+(477, 'Predicting Portein Folds', '2026-02-10', null, 74, 'Active', 715),
+(236, 'Halting Problem Solved', '2026-03-15', null, 480, 'Paused', 518),
+(769, 'Room-Temperature Superconductors', '2026-04-11', null, 100, 'Active', 843);
 
 # WORKS INSERTS
 INSERT INTO works (PID, MID, ROLE, HOURS)
