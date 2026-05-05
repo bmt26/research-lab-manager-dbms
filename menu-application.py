@@ -15,7 +15,7 @@ TABLE_TITLES = ["COLLABORATOR",
                 "DEVICE",
                 "EQUIPMENT",
                 "FACULTY",
-                "GRANT",
+                "`GRANT`",
                 "LAB_MEMBER",
                 "PROJECT",
                 "PUBLICATION",
@@ -291,6 +291,18 @@ def display_project_status():
         ):
             print(row)
 
+# Show members who have worked on projects funded by a given grant.
+def display_grant_members():
+    print("(MEMBER NAME, PID, GID)")
+    for row in query_db(
+        """
+        SELECT m.NAME, w.PID, g.GID
+        FROM lab_member AS m, works AS w, `grant` AS g
+        WHERE m.MID = w.MID AND w.PID = g.PID
+        """
+    ):
+        print(row)
+
 # Show all mentor mentee pairs that work on the same project
 def display_mentor_mentee_collaboration():
     print("(MENTOR NAME, MENTEE NAME, PID)")
@@ -408,7 +420,7 @@ def main_menu():
         elif choice == "3":
             grant_publication_reporting()
         elif choice.upper() == "T":
-            display_mentor_mentee_collaboration()
+            display_grant_members()
         elif choice.upper() == "EXIT":
             sys.exit()
 
@@ -437,7 +449,7 @@ def project_member_management():
         elif choice == "2":
             display_project_status()
         elif choice == "3":
-            choice_wip()
+            display_grant_members()
         elif choice == "4":
             display_mentor_mentee_collaboration()
         elif choice.upper() == "EXIT":
