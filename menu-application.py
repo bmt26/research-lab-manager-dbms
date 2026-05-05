@@ -2,6 +2,7 @@ import mysql.connector
 import os
 import sys
 import re
+from datetime import datetime
 from dotenv import load_dotenv
 
 # Import password
@@ -50,18 +51,36 @@ def choice_wip():
 
 # Helper function to evaluate if the value for an attribute is the correct format
 def check_attribute_value_format(data_type, value):
+    # Check which data type is used
+    # Integer
     if data_type == "int":
+        # Try to convert to int, if successful, return value, else error
         try:
             int(value)
             return (1, value)
         except ValueError:
             print(f"Error: {value} is an invalid {data_type}")
+
+    # Date
     elif data_type == "date":
-        return (1, value)
+        try:
+            datetime.strptime(value, "%Y-%m-%d")
+            return (1, value)
+        except ValueError:
+            print(f"Error: {value} is an invalid {data_type}, date formatted as YYYY-MM-DD")
+        #if re.fullmatch(r"\d{4}-\d{2}-\d{2}", value):
+        #
+        #else:
+       #
+
+    # Varchar(#) (String)
     elif re.fullmatch(r"varchar\(\d+\)", data_type):
+        # Get varchar length
         string_len = int(re.search(r"(\d+)", data_type).group())
+
+        # Ensure string is short enough, else return error
         if len(value) <= string_len:
-            return (1, f"\"{value}\"")
+            return (1, value)
         else:
             print(f"Error: {value} is an invalid {data_type}, too long")
     return (0, None)
@@ -401,7 +420,7 @@ def crud_member_projects():
         elif choice == "RM":
             read_table("LAB_MEMBER")
         elif choice == "UM":
-            choice_wip()
+            update_table("LAB_MEMBER")
         elif choice == "DM":
             choice_wip()
         elif choice == "CP":
@@ -409,7 +428,7 @@ def crud_member_projects():
         elif choice == "RP":
             read_table("PROJECT")
         elif choice == "UP":
-            choice_wip()
+            update_table("PROJECT")
         elif choice == "DP":
             choice_wip()
         elif choice == "EXIT":
