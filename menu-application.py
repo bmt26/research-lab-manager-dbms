@@ -291,6 +291,18 @@ def display_project_status():
         ):
             print(row)
 
+# Show all mentor mentee pairs that work on the same project
+def display_mentor_mentee_collaboration():
+    print("(MENTOR NAME, MENTEE NAME, PID)")
+    for row in query_db(
+        """
+        SELECT mentor.NAME, mentee.NAME, w1.PID
+        FROM lab_member AS mentor, lab_member AS mentee, works AS w1, works AS w2
+        WHERE mentor.MID = mentee.MENTOR AND w1.MID = mentor.MID AND w2.MID = mentee.MID AND w1.PID = w2.PID
+        """
+    ):
+        print(row)
+
 # WIP
 # Insert into Database with parameter "query"
 def insert_db(query):
@@ -395,8 +407,8 @@ def main_menu():
             equipment_usage_tracking()
         elif choice == "3":
             grant_publication_reporting()
-        elif choice.upper() == "t":
-            display_project_status()
+        elif choice.upper() == "T":
+            display_mentor_mentee_collaboration()
         elif choice.upper() == "EXIT":
             sys.exit()
 
@@ -424,12 +436,10 @@ def project_member_management():
             crud_member_projects()
         elif choice == "2":
             display_project_status()
-        elif choice == "2":
-            choice_wip()
         elif choice == "3":
             choice_wip()
         elif choice == "4":
-            choice_wip()
+            display_mentor_mentee_collaboration()
         elif choice.upper() == "EXIT":
             sys.exit()
 
