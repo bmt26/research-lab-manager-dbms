@@ -240,7 +240,6 @@ def update_table(table_title):
         if (check_results[0] == 1):
             filter_value = check_results[1]
             break
-
                 
     # Loop through input options
     while True:
@@ -286,6 +285,153 @@ def update_table(table_title):
     # Prepare Data Manipulation SQL and Val parameters
     sql = f"UPDATE {table_title} SET {update_attr} = %s WHERE {filter_attr} = %s"
     val = (update_value, filter_value)
+
+    # Loop through input options
+    while True:
+        # Text
+        print(f"\nIs this correct?")
+        print(f"sql = {sql}")
+        print(f"fal = {val}")
+        print("y. Yes (Apply Update)")
+        print("n. No (Go back WITHOUT SAVING)")
+        print("Or type EXIT to exit WITHOUT SAVING.")
+
+        # Get Input
+        choice = input("Choose an option: ")
+
+        # Evaluate Input
+        if choice == "n":
+            return
+        elif choice.upper() == "EXIT":
+            sys.exit()
+        elif choice.upper() == "Y":
+            break
+        else:
+            continue
+
+        # Get Input
+        choice = input("Choose an option: ")
+
+        # Evaluate Input
+        check_results = check_attribute_value_format(data_type, choice)
+        if (check_results[0] == 1):
+            update_value = check_results[1]
+            break
+
+    # Send Data Manipulation
+    manipulate_db(sql, val)
+
+# Delete Function for all tables
+def delete_table(table_title):
+    # Reformat to allow any case
+    table_title = table_title.upper()
+
+    # Ensure table_title is a valid title
+    if table_title is None or table_title.upper() not in TABLE_TITLES:
+        print("\nError: Invalid selection \"" + table_title + "\" for table title")
+        return
+
+    # Text
+    if table_title in ["COLLABORATOR", "FACULTY", "LAB_MEMBER", "PROJECT", "STUDENT", "WORKS"]:
+        print("\n--- Research Lab Manager DBMS")
+        print("  --- Project and Member Management")
+        print("    --- CRUD Members/Projects")
+    elif table_title in ["DEVICE", "EQUIPMENT", "USES"]:
+        print("\n--- Research Lab Manager DBMS")
+        print("  --- Equipment Usage Tracking")
+        print("    --- CRUD Equipment/Equipment Usage")
+    elif table_title in ["`GRANT`", "PUBLICATION", "PUBLISHES"]:
+        print("\n--- Research Lab Manager DBMS")
+        print("  --- Grant and Publication Reporting")
+        print("    --- CRUD Grants/Publications")
+    print(f"      --- Delete {table_title}")
+
+    # Declare variables
+    filter_attr = None
+    filter_value = None
+    update_attr = None
+    update_value = None
+
+    # Get Table Structure
+    table_structure = query_db("DESCRIBE " + table_title)
+    table_attributes = [inner[0] for inner in table_structure]
+
+    # Loop through input options
+    while True:
+        # Text
+        print("\nWhich attribute do you want to filter by?")
+        print(table_attributes[0], end="")
+        for attribute in table_attributes[1:]:
+            print(", " + attribute, end="")
+        print(" ")
+        print("Or type 0 to go back.")
+        print("Or type EXIT to exit.")
+
+        # Get Input
+        choice = input("Choose an option: ")
+
+        # Evaluate Input
+        if choice == "0":
+            return
+        elif choice == "EXIT":
+            sys.exit()
+        elif choice.upper() in table_attributes:
+            filter_attr = choice.upper()
+            break
+
+    # Store the filter attribute data type
+    data_type = table_structure[table_attributes.index(filter_attr)][1]
+
+    # Loop through input options
+    while True:
+        # Text
+        print(f"\nWhat value do you want to filter {filter_attr} by?")
+        print(filter_attr + ": " + data_type)
+
+        # Get Input
+        choice = input("Choose an option: ")
+
+        # Evaluate Input
+        check_results = check_attribute_value_format(data_type, choice)
+        if (check_results[0] == 1):
+            filter_value = check_results[1]
+            break
+
+    # Prepare Data Manipulation SQL and Val parameters
+    sql = f"DELETE FROM {table_title} WHERE {filter_attr} = %s"
+    val = [filter_value]
+
+    # Loop through input options
+    while True:
+        # Text
+        print(f"\nIs this correct?")
+        print(f"sql = {sql}")
+        print(f"fal = {val}")
+        print("y. Yes (Apply Delete)")
+        print("n. No (Go back WITHOUT SAVING)")
+        print("Or type EXIT to exit WITHOUT SAVING.")
+
+        # Get Input
+        choice = input("Choose an option: ")
+
+        # Evaluate Input
+        if choice == "n":
+            return
+        elif choice.upper() == "EXIT":
+            sys.exit()
+        elif choice.upper() == "Y":
+            break
+        else:
+            continue
+
+        # Get Input
+        choice = input("Choose an option: ")
+
+        # Evaluate Input
+        check_results = check_attribute_value_format(data_type, choice)
+        if (check_results[0] == 1):
+            update_value = check_results[1]
+            break
 
     # Send Data Manipulation
     manipulate_db(sql, val)
@@ -675,7 +821,8 @@ def main_menu():
         elif choice == "3":
             grant_publication_reporting()
         elif choice.upper() == "T":
-            update_table(input("Enter a Table Name"))
+            print(TABLE_TITLES)
+            delete_table(input("Enter a Table Name: "))
         elif choice.upper() == "EXIT":
             sys.exit()
 
