@@ -16,7 +16,6 @@
       * Group By:
       * Having: Filter Group By (Seems complicated)
       * Aggregate Functions: Count, Sum, Avg, min, max
-    * Delete
   * Equipment Usage Tracking
 
     * Equipment Status
