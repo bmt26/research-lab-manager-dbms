@@ -522,18 +522,6 @@ def display_equipment_status():
     # Loop display message waiting on user input
     while True:
         # Text
-        ["COLLABORATOR",
-         "DEVICE",
-         "EQUIPMENT",
-         "FACULTY",
-         "`GRANT`",
-         "LAB_MEMBER",
-         "PROJECT",
-         "PUBLICATION",
-         "PUBLISHES",
-         "STUDENT",
-         "USES",
-         "WORKS"]
         print("\n--- Research Lab Manager DBMS")
         print("  --- Equipment Usage Tracking")
         print("    --- Display Equipment Status")
