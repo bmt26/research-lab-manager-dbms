@@ -1,59 +1,236 @@
 import mysql.connector
 import os
 import sys
+import re
 from dotenv import load_dotenv
 
 # Import password
 load_dotenv()
-my_password = os.getenv("DB_PASSWORD")
-my_database = "researchlabmanager"
+MY_PASSWORD = os.getenv("DB_PASSWORD")
+MY_DATABASE = "researchlabmanager"
 
-table_titles = ["GRANT",
-                "PROJECT",
-                "WORKS",
-                "LAB_MEMBER",
-                "STUDENT",
-                "COLLABORATOR",
-                "FACULTY",
-                "USES",
+# Title names for functions
+TABLE_TITLES = ["COLLABORATOR",
                 "DEVICE",
                 "EQUIPMENT",
+                "FACULTY",
+                "GRANT",
+                "LAB_MEMBER",
+                "PROJECT",
+                "PUBLICATION",
                 "PUBLISHES",
-                "PUBLICATION"]
-"""(lab members, students, collaborator, faculty
-     , projects,
-    equipment, device
- grant
- publication
- publishes)*/"""
+                "STUDENT",
+                "USES",
+                "WORKS"]
+TABLE_SHORTHAND = ["C",
+                "D",
+                "E",
+                "F",
+                "G",
+                "L",
+                "P",
+                "PC",
+                "PS",
+                "S",
+                "U",
+                "W"]
 
 # Connect to the Database with relevant info
 def connect_db():
     return mysql.connector.connect(
         host="localhost",
         user="root",
-        password=my_password,
-        database=my_database
+        password=MY_PASSWORD,
+        database=MY_DATABASE
     )
 
+# Function for work in progress choices
 def choice_wip():
     print("\nSorry, this feature is a Work In Progress.")
 
-# Test function to view all Lab Members
+# Helper function to evaluate if the value for an attribute is the correct format
+def check_attribute_value_format(data_type, value):
+    if data_type == "int":
+        try:
+            int(value)
+            return (1, value)
+        except ValueError:
+            print(f"Error: {value} is an invalid {data_type}")
+    elif data_type == "date":
+        return (1, value)
+    elif re.fullmatch(r"varchar\(\d+\)", data_type):
+        string_len = int(re.search(r"(\d+)", data_type).group())
+        if len(value) <= string_len:
+            return (1, f"\"{value}\"")
+        else:
+            print(f"Error: {value} is an invalid {data_type}, too long")
+    return (0, None)
+
+# Query the Database with parameter "query"
 def query_db(query):
     try:
+        # Connect to the Database
         conn = connect_db()
         cursor = conn.cursor()
         cursor.execute(query);
 
-        for row in cursor.fetchall():
-            print(row)
+        # Process Query
+        query_result = cursor.fetchall()
 
+        # Close Connection and return results
         conn.close()
+        return query_result
+
+    # Error handling
+    except Exception as e:
+        print("Error:", e)
+        conn.close()
+
+# Manipulate the Database with parameter "sql" and "val
+def manipulate_db(sql, val):
+    try:
+        # Connect to the Database
+        conn = connect_db()
+        cursor = conn.cursor()
+
+        # Process Manipulation
+        print(sql)
+        print(val)
+        cursor.execute(sql, val);
+        conn.commit()
+
+        print(cursor.rowcount, "record(s) affected")
+
+    # Error handling
     except Exception as e:
         print("Error:", e)
 
-# Test function to view all Lab Members
+    # Close Connection
+    conn.close()
+
+# Read Function for all tables
+def read_table(table_title):
+    # Ensure table_title is a valid title
+    if table_title is None or table_title.upper() not in TABLE_TITLES :
+        print("Error: Invalid selection \"" + table_title + "\" for table title")
+        return
+    table_structure = query_db("DESCRIBE " + table_title)
+    # Select: Which attributes wanted returned?
+    # Where: Filter by condition
+    # Order By: Sort by attribute
+    # Group By:
+    # Having: Filter Group By (Seems complicated)
+    # Aggregate Functions: Count, Sum, Avg, min, max
+    for row in query_db(
+        """
+        SELECT *
+        FROM """ + table_title + """
+        """
+    ):
+        print(row)
+
+# Update Function for all tables
+def update_table(table_title):
+    # Ensure table_title is a valid title
+    if table_title is None or table_title.upper() not in TABLE_TITLES :
+        print("\nError: Invalid selection \"" + table_title + "\" for table title")
+        return
+
+    # Declare variables
+    filter_attr = None
+    filter_value = None
+    update_attr = None
+    update_value = None
+
+    # Get Table Structure
+    table_structure = query_db("DESCRIBE " + table_title)
+    table_attributes = [inner[0] for inner in table_structure]
+
+    # Loop through input options
+    while True:
+        # Text
+        print("\nWhich attribute do you want to filter by?")
+        print(table_attributes[0], end="")
+        for attribute in table_attributes[1:]:
+            print(", " + attribute, end="")
+        print(" ")
+
+        # Get Input
+        choice = input("Choose an option: ")
+
+        # Evaluate Input
+        if choice == "0":
+            return
+        elif choice == "EXIT":
+            sys.exit()
+        elif choice.upper() in table_attributes:
+            filter_attr = choice.upper()
+            break
+
+    # Store the filter attribute data type
+    data_type = table_structure[table_attributes.index(filter_attr)][1]
+
+    # Loop through input options
+    while True:
+        # Text
+        print(f"\nWhat value do you want to filter {filter_attr} by?")
+        print(filter_attr + ": " + data_type)
+
+        # Get Input
+        choice = input("Choose an option: ")
+
+        # Evaluate Input
+        check_results = check_attribute_value_format(data_type, choice)
+        if (check_results[0] == 1):
+            filter_value = check_results[1]
+            break
+
+                
+    # Loop through input options
+    while True:
+        # Text
+        print("\nWhich attribute do you want to update?")
+        print(table_attributes[0], end="")
+        for attribute in table_attributes[1:]:
+            print(", " + attribute, end="")
+        print(" ")
+
+        # Get Input
+        choice = input("Choose an option: ")
+
+        # Evaluate Input
+        if choice == "0":
+            return
+        elif choice == "EXIT":
+            sys.exit()
+        elif choice.upper() in table_attributes:
+            update_attr = choice.upper()
+            break
+
+    # Store the update attribute data type
+    data_type = table_structure[table_attributes.index(update_attr)][1]
+
+    # Loop through input options
+    while True:
+        # Text
+        print(f"\nWhat value do you want to update {update_attr} to?")
+        print(update_attr + ": " + data_type)
+
+        # Get Input
+        choice = input("Choose an option: ")
+
+        # Evaluate Input
+        check_results = check_attribute_value_format(data_type, choice)
+        if (check_results[0] == 1):
+            update_value = check_results[1]
+            break
+
+    sql = f"UPDATE {table_title} SET {update_attr} = %s WHERE {filter_attr} = %s"
+    val = (update_value, filter_value)
+    manipulate_db(sql, val)
+
+# WIP
+# Insert into Database with parameter "query"
 def insert_db(query):
     try:
         conn = connect_db()
@@ -70,7 +247,9 @@ def insert_db(query):
     except Exception as e:
         print("Error:", e)
 
-def query_table_format(query):
+# TEMP
+# Get the table for a specific format for creation
+def create_table_format(query):
     try:
         conn = connect_db()
         cursor = conn.cursor()
@@ -86,19 +265,19 @@ def query_table_format(query):
         print("Error:", e)
 
 # WIP
-def create_test():
-    tables = ['Student', 'Faculty', 'Collaborator']
+def create_member(tn):
     query_result = [None] * len(tables)
     for i in range(len(tables)):
-        query_result[i] = query_table_format(
-            """SELECT COLUMN_NAME
-               FROM (SELECT COLUMN_NAME,
+        query_result[i] = create_table_format(
+            """
+                SELECT COLUMN_NAME
+                FROM (SELECT COLUMN_NAME,
                             MIN(CASE WHEN TABLE_NAME = 'lab_member' THEN 1 ELSE 2 END) AS table_priority,
                             MIN(ORDINAL_POSITION)                                      AS position_priority
                      FROM INFORMATION_SCHEMA.COLUMNS
                      WHERE TABLE_NAME IN ('lab_member', '""" + tables[i] + """')
                      GROUP BY COLUMN_NAME) AS C
-               ORDER BY table_priority, position_priority;
+                ORDER BY table_priority, position_priority;
             """
         )
 
@@ -133,8 +312,6 @@ def create_test():
             print(query)
             query_db(query)
 
-
-
 # Text Menu
 def main_menu():
     # Loop display message waiting on user input
@@ -156,8 +333,8 @@ def main_menu():
             equipment_usage_tracking()
         elif choice == "3":
             grant_publication_reporting()
-        elif choice == "test":
-            create_test()
+        elif choice == "t":
+            update_table("PROJECT")
         elif choice == "EXIT":
             sys.exit()
 
@@ -222,7 +399,7 @@ def crud_member_projects():
         elif choice == "CM":
             choice_wip()
         elif choice == "RM":
-            choice_wip()
+            read_table("LAB_MEMBER")
         elif choice == "UM":
             choice_wip()
         elif choice == "DM":
@@ -230,7 +407,7 @@ def crud_member_projects():
         elif choice == "CP":
             choice_wip()
         elif choice == "RP":
-            choice_wip()
+            read_table("PROJECT")
         elif choice == "UP":
             choice_wip()
         elif choice == "DP":
