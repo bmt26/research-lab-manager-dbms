@@ -129,10 +129,28 @@ def manipulate_db(sql, val):
 
 # Read Function for all tables
 def read_table(table_title):
+    # Reformat to allow any case
+    table_title = table_title.upper()
+
     # Ensure table_title is a valid title
-    if table_title is None or table_title.upper() not in TABLE_TITLES :
+    if table_title is None or table_title not in TABLE_TITLES :
         print("Error: Invalid selection \"" + table_title + "\" for table title")
         return
+
+    # Text
+    if table_title in ["COLLABORATOR", "FACULTY", "LAB_MEMBER", "PROJECT", "STUDENT", "WORKS"]:
+        print("\n--- Research Lab Manager DBMS")
+        print("  --- Project and Member Management")
+        print("    --- CRUD Members/Projects")
+    elif table_title in ["DEVICE", "EQUIPMENT", "USES"]:
+        print("\n--- Research Lab Manager DBMS")
+        print("  --- Equipment Usage Tracking")
+        print("    --- CRUD Equipment/Equipment Usage")
+    elif table_title in ["`GRANT`", "PUBLICATION", "PUBLISHES"]:
+        print("\n--- Research Lab Manager DBMS")
+        print("  --- Grant and Publication Reporting")
+        print("    --- CRUD Grants/Publications")
+    print(f"      --- Read {table_title}")
 
     # Get Table Structure
     table_structure = query_db("DESCRIBE " + table_title)
@@ -149,10 +167,28 @@ def read_table(table_title):
 
 # Update Function for all tables
 def update_table(table_title):
+    # Reformat to allow any case
+    table_title = table_title.upper()
+    
     # Ensure table_title is a valid title
     if table_title is None or table_title.upper() not in TABLE_TITLES :
         print("\nError: Invalid selection \"" + table_title + "\" for table title")
         return
+
+    # Text
+    if table_title in ["COLLABORATOR", "FACULTY", "LAB_MEMBER", "PROJECT", "STUDENT", "WORKS"]:
+        print("\n--- Research Lab Manager DBMS")
+        print("  --- Project and Member Management")
+        print("    --- CRUD Members/Projects")
+    elif table_title in ["DEVICE", "EQUIPMENT", "USES"]:
+        print("\n--- Research Lab Manager DBMS")
+        print("  --- Equipment Usage Tracking")
+        print("    --- CRUD Equipment/Equipment Usage")
+    elif table_title in ["`GRANT`", "PUBLICATION", "PUBLISHES"]:
+        print("\n--- Research Lab Manager DBMS")
+        print("  --- Grant and Publication Reporting")
+        print("    --- CRUD Grants/Publications")
+    print(f"      --- Update {table_title}")
 
     # Declare variables
     filter_attr = None
@@ -340,6 +376,18 @@ def display_equipment_status():
     # Loop display message waiting on user input
     while True:
         # Text
+        ["COLLABORATOR",
+         "DEVICE",
+         "EQUIPMENT",
+         "FACULTY",
+         "`GRANT`",
+         "LAB_MEMBER",
+         "PROJECT",
+         "PUBLICATION",
+         "PUBLISHES",
+         "STUDENT",
+         "USES",
+         "WORKS"]
         print("\n--- Research Lab Manager DBMS")
         print("  --- Equipment Usage Tracking")
         print("    --- Display Equipment Status")
@@ -627,7 +675,7 @@ def main_menu():
         elif choice == "3":
             grant_publication_reporting()
         elif choice.upper() == "T":
-            display_grant_members()
+            update_table(input("Enter a Table Name"))
         elif choice.upper() == "EXIT":
             sys.exit()
 
