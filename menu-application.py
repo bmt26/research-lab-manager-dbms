@@ -133,13 +133,12 @@ def read_table(table_title):
     if table_title is None or table_title.upper() not in TABLE_TITLES :
         print("Error: Invalid selection \"" + table_title + "\" for table title")
         return
+
+    # Get Table Structure
     table_structure = query_db("DESCRIBE " + table_title)
-    # Select: Which attributes wanted returned?
-    # Where: Filter by condition
-    # Order By: Sort by attribute
-    # Group By:
-    # Having: Filter Group By (Seems complicated)
-    # Aggregate Functions: Count, Sum, Avg, min, max
+    table_attributes = [inner[0] for inner in table_structure]
+
+    # Query and Display Results
     for row in query_db(
         """
         SELECT *
@@ -173,6 +172,8 @@ def update_table(table_title):
         for attribute in table_attributes[1:]:
             print(", " + attribute, end="")
         print(" ")
+        print("Or type 0 to go back.")
+        print("Or type EXIT to exit.")
 
         # Get Input
         choice = input("Choose an option: ")
@@ -213,6 +214,8 @@ def update_table(table_title):
         for attribute in table_attributes[1:]:
             print(", " + attribute, end="")
         print(" ")
+        print("Or type 0 to go back.")
+        print("Or type EXIT to exit.")
 
         # Get Input
         choice = input("Choose an option: ")
@@ -244,8 +247,11 @@ def update_table(table_title):
             update_value = check_results[1]
             break
 
+    # Prepare Data Manipulation SQL and Val parameters
     sql = f"UPDATE {table_title} SET {update_attr} = %s WHERE {filter_attr} = %s"
     val = (update_value, filter_value)
+
+    # Send Data Manipulation
     manipulate_db(sql, val)
 
 # Display the status of a project
@@ -268,11 +274,11 @@ def display_project_status():
         choice = input("Choose an option: ")
 
         # Evaluate Input
-        if choice == "B":
+        if choice.upper() == "B":
             return
-        elif choice == "EXIT":
+        elif choice.upper() == "EXIT":
             sys.exit()
-        elif choice == "ALL":
+        elif choice.upper() == "ALL":
             pid = "pid"
         else:
             check = check_attribute_value_format("int", choice)
@@ -281,6 +287,7 @@ def display_project_status():
             else:
                 continue
 
+        # Query and Display Results
         print("(PID, TITLE, STATUS)")
         for row in query_db(
             f"""
@@ -293,6 +300,12 @@ def display_project_status():
 
 # Show members who have worked on projects funded by a given grant.
 def display_grant_members():
+    # Text
+    print("\n--- Research Lab Manager DBMS")
+    print("  --- Project and Member Management")
+    print("    --- Display Grant Members")
+
+    # Query and Display Results
     print("(MEMBER NAME, PID, GID)")
     for row in query_db(
         """
@@ -305,12 +318,206 @@ def display_grant_members():
 
 # Show all mentor mentee pairs that work on the same project
 def display_mentor_mentee_collaboration():
+    # Text
+    print("\n--- Research Lab Manager DBMS")
+    print("  --- Project and Member Management")
+    print("    --- Display Mentor-Mentee Collaboration")
+
+    # Query and Display Results
     print("(MENTOR NAME, MENTEE NAME, PID)")
     for row in query_db(
         """
         SELECT mentor.NAME, mentee.NAME, w1.PID
         FROM lab_member AS mentor, lab_member AS mentee, works AS w1, works AS w2
         WHERE mentor.MID = mentee.MENTOR AND w1.MID = mentor.MID AND w2.MID = mentee.MID AND w1.PID = w2.PID
+        """
+    ):
+        print(row)
+
+
+# Show status of a piece of equipment
+def display_equipment_status():
+    # Loop display message waiting on user input
+    while True:
+        # Text
+        print("\n--- Research Lab Manager DBMS")
+        print("  --- Equipment Usage Tracking")
+        print("    --- Display Equipment Status")
+        print("0. Back")
+        print("1. Sample Query")
+        print("Or type EXIT to exit.")
+
+        # Get Input
+        choice = input("Choose an option: ")
+
+        # Evaluate Input
+        if choice == "0":
+            break
+        elif choice == "EXIT":
+            sys.exit()
+        elif choice == "1":
+            pass
+        else:
+            continue
+
+        # Query and Display Results
+        print("(WIP)")
+        for row in query_db(
+            """
+            SELECT true
+            FROM dual
+            WHERE false;
+            """
+        ):
+            print(row)
+
+# Show members currently using a given piece of equipment and the projects they
+# are working on.
+def display_equipment_usage():
+    # Loop display message waiting on user input
+    while True:
+        # Text
+        print("\n--- Research Lab Manager DBMS")
+        print("  --- Equipment Usage Tracking")
+        print("    --- Display Equipment Usage")
+        print("0. Back")
+        print("1. Sample Query")
+        print("Or type EXIT to exit.")
+
+        # Get Input
+        choice = input("Choose an option: ")
+
+        # Evaluate Input
+        if choice == "0":
+            break
+        elif choice == "EXIT":
+            sys.exit()
+        elif choice == "1":
+            pass
+        else:
+            continue
+
+        # Query and Display Results
+        print("(WIP)")
+        for row in query_db(
+            """
+            SELECT true
+            FROM dual
+            WHERE false;
+            """
+        ):
+            print(row)
+
+# List the top 5 projects ranked by their total grant funding, and show the total
+# amount each project received, in decreasing order of total funding (assume
+# Budget is the dollar amount of each grant).
+def display_top_five_projects():
+    # Text
+    print("\n--- Research Lab Manager DBMS")
+    print("  --- Grant and Publication Reporting")
+    print("    --- Top Five Projects")
+
+    # Query and Display Results
+    print("(WIP)")
+    for row in query_db(
+        """
+        SELECT true
+        FROM dual
+        WHERE false;
+        """
+    ):
+        print(row)
+
+# Find the mentor(s) whose mentees collectively produced the largest number of
+# publications.
+def display_top_mentor():
+    # Text
+    print("\n--- Research Lab Manager DBMS")
+    print("  --- Grant and Publication Reporting")
+    print("    --- Display Top Mentors")
+
+    # Query and Display Results
+    print("(WIP)")
+    for row in query_db(
+        """
+        SELECT true
+        FROM dual
+        WHERE false;
+        """
+    ):
+        print(row)
+
+# Calculate the total number of student publications per major and per publication
+# year.
+def display_student_publications():
+    # Text
+    print("\n--- Research Lab Manager DBMS")
+    print("  --- Grant and Publication Reporting")
+    print("    --- Display Student Publications")
+
+    # Query and Display Results
+    print("(WIP)")
+    for row in query_db(
+        """
+        SELECT true
+        FROM dual
+        WHERE false;
+        """
+    ):
+        print(row)
+
+# Given a date X, find the projects that ended before X and the number of grants
+# that funded each project.
+def display_completed_projects():
+    # Loop display message waiting on user input
+    while True:
+        # Text
+        print("\n--- Research Lab Manager DBMS")
+        print("  --- Grant and Publication Reporting")
+        print("    --- Display Completed Projects")
+        print("0. Back")
+        print("1. Sample Query")
+        print("Or type EXIT to exit.")
+
+        # Get Input
+        choice = input("Choose an option: ")
+
+        # Evaluate Input
+        if choice == "0":
+            break
+        elif choice == "EXIT":
+            sys.exit()
+        elif choice == "1":
+            pass
+        else:
+            continue
+
+        # Query and Display Results
+        print("(WIP)")
+        for row in query_db(
+            """
+            SELECT true
+            FROM dual
+            WHERE false;
+            """
+        ):
+            print(row)
+
+# Find the three most productive years in terms of publications produced by
+# students.
+def display_productive_years():
+    # Text
+    print("\n--- Research Lab Manager DBMS")
+    print("  --- Grant and Publication Reporting")
+    print("    --- Display Productive Years")
+
+    # Query and Display Results
+    print("(WIP)")
+    for row in query_db(
+        """
+        SELECT true
+        FROM dual
+        WHERE false;
         """
     ):
         print(row)
@@ -521,9 +728,9 @@ def equipment_usage_tracking():
         elif choice == "1":
             crud_equipment()
         elif choice == "2":
-            choice_wip()
+            display_equipment_status()
         elif choice == "3":
-            choice_wip()
+            display_equipment_usage()
         elif choice == "EXIT":
             sys.exit()
 
@@ -611,15 +818,15 @@ students.""")
         if choice == "0":
             break
         elif choice == "1":
-            choice_wip()
+            display_top_five_projects()
         elif choice == "2":
-            choice_wip()
+            display_top_mentor()
         elif choice == "3":
-            choice_wip()
+            display_student_publications()
         elif choice == "4":
-            choice_wip()
+            display_completed_projects()
         elif choice == "5":
-            choice_wip()
+            display_productive_years()
         elif choice.upper() == "EXIT":
             sys.exit()
 
