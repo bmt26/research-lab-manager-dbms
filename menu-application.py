@@ -248,6 +248,48 @@ def update_table(table_title):
     val = (update_value, filter_value)
     manipulate_db(sql, val)
 
+# Display the status of a project
+def display_project_status():
+    # Loop display message waiting on user input
+    while True:
+        # Text
+        print("\n--- Research Lab Manager DBMS")
+        print("  --- Project and Member Management")
+        print("    --- Project Status")
+        print("Enter a Project ID number to view its status")
+        print("Or type ALL to view project status")
+        print("Or type B to go Back")
+        print("Or type EXIT to exit.")
+
+        # Declare variables
+        pid = None
+
+        # Get Input
+        choice = input("Choose an option: ")
+
+        # Evaluate Input
+        if choice == "B":
+            return
+        elif choice == "EXIT":
+            sys.exit()
+        elif choice == "ALL":
+            pid = "pid"
+        else:
+            check = check_attribute_value_format("int", choice)
+            if (check[0]==1):
+                pid = choice
+            else:
+                continue
+
+        for row in query_db(
+            f"""
+            SELECT pid, status
+            FROM project
+            WHERE pid = {pid}
+            """
+        ):
+            print(row)
+
 # WIP
 # Insert into Database with parameter "query"
 def insert_db(query):
@@ -353,7 +395,7 @@ def main_menu():
         elif choice == "3":
             grant_publication_reporting()
         elif choice == "t":
-            update_table("PROJECT")
+            display_project_status()
         elif choice == "EXIT":
             sys.exit()
 
@@ -380,7 +422,7 @@ def project_member_management():
         elif choice == "1":
             crud_member_projects()
         elif choice == "2":
-            choice_wip()
+            display_project_status()
         elif choice == "2":
             choice_wip()
         elif choice == "3":
