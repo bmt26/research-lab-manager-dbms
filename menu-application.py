@@ -395,9 +395,9 @@ def main_menu():
             equipment_usage_tracking()
         elif choice == "3":
             grant_publication_reporting()
-        elif choice == "t":
+        elif choice.upper() == "t":
             display_project_status()
-        elif choice == "EXIT":
+        elif choice.upper() == "EXIT":
             sys.exit()
 
 # Project and Member Management sub menu
@@ -430,7 +430,7 @@ def project_member_management():
             choice_wip()
         elif choice == "4":
             choice_wip()
-        elif choice == "EXIT":
+        elif choice.upper() == "EXIT":
             sys.exit()
 
 # Project and Member Management sub menu
@@ -458,23 +458,23 @@ def crud_member_projects():
         # Evaluate Input
         if choice == "0":
             break
-        elif choice == "CM":
+        elif choice.upper() == "CM":
             choice_wip()
-        elif choice == "RM":
+        elif choice.upper() == "RM":
             read_table("LAB_MEMBER")
-        elif choice == "UM":
+        elif choice.upper() == "UM":
             update_table("LAB_MEMBER")
-        elif choice == "DM":
+        elif choice.upper() == "DM":
             choice_wip()
-        elif choice == "CP":
+        elif choice.upper() == "CP":
             choice_wip()
-        elif choice == "RP":
+        elif choice.upper() == "RP":
             read_table("PROJECT")
-        elif choice == "UP":
+        elif choice.upper() == "UP":
             update_table("PROJECT")
-        elif choice == "DP":
+        elif choice.upper() == "DP":
             choice_wip()
-        elif choice == "EXIT":
+        elif choice.upper() == "EXIT":
             sys.exit()
 
 # Equipment Usage Tracking sub menu
@@ -485,8 +485,9 @@ def equipment_usage_tracking():
         print("\n--- Research Lab Manager DBMS")
         print("  --- Equipment Usage Tracking")
         print("0. Back")
-        print("1. Option 1")
-        print("2. Option 2")
+        print("1. Create/Read/Update/Delete Equipment and Equipment Usage")
+        print("2. Show status of a piece of equipment")
+        print("3. Show members currently using a given piece of equipment and the projects they are working on.")
         print("Or type EXIT to exit.")
 
         # Get Input
@@ -496,10 +497,68 @@ def equipment_usage_tracking():
         if choice == "0":
             break
         elif choice == "1":
-            choice_wip()
+            crud_equipment()
         elif choice == "2":
             choice_wip()
+        elif choice == "3":
+            choice_wip()
         elif choice == "EXIT":
+            sys.exit()
+
+# Equipment and Equipment Usage sub menu
+def crud_equipment():
+    # Loop display message waiting on user input
+    while True:
+        # Text
+        print("\n--- Research Lab Manager DBMS")
+        print("  --- Equipment Usage Tracking")
+        print("    --- CRUD Equipment/Equipment Usage")
+        print("0. Back")
+        print("CE. Create Equipment")
+        print("RE. Read Equipment")
+        print("UE. Update Equipment")
+        print("DE. Delete Equipment")
+        print("CD. Create Device")
+        print("RD. Read Device")
+        print("UD. Update Device")
+        print("DD. Delete Device")
+        print("CU. Create Uses")
+        print("RU. Read Uses")
+        print("UU. Update Uses")
+        print("DU. Delete Uses")
+        print("Or type EXIT to exit.")
+
+        # Get Input
+        choice = input("Choose an option: ")
+
+        # Evaluate Input
+        if choice == "0":
+            break
+        elif choice.upper() == "CE":
+            choice_wip()
+        elif choice.upper() == "RE":
+            read_table("EQUIPMENT")
+        elif choice.upper() == "UE":
+            update_table("EQUIPMENT")
+        elif choice.upper() == "DE":
+            choice_wip()
+        elif choice.upper() == "CD":
+            choice_wip()
+        elif choice.upper() == "RD":
+            read_table("DEVICE")
+        elif choice.upper() == "UD":
+            update_table("DEVICE")
+        elif choice.upper() == "DD":
+            choice_wip()
+        elif choice.upper() == "CU":
+            choice_wip()
+        elif choice.upper() == "RU":
+            read_table("USES")
+        elif choice.upper() == "UU":
+            update_table("USES")
+        elif choice.upper() == "DU":
+            choice_wip()
+        elif choice.upper() == "EXIT":
             sys.exit()
 
 # Grant and Publication Reporting sub menu
@@ -510,8 +569,17 @@ def grant_publication_reporting():
         print("\n--- Research Lab Manager DBMS")
         print("  --- Grant and Publication Reporting")
         print("0. Back")
-        print("1. Option 1")
-        print("2. Option 2")
+        print("""1. List the top 5 projects ranked by their total grant funding, and show the total
+amount each project received, in decreasing order of total funding (assume
+Budget is the dollar amount of each grant).""")
+        print("""2. Find the mentor(s) whose mentees collectively produced the largest number of
+publications.""")
+        print("""3. Calculate the total number of student publications per major and per publication
+year.""")
+        print("""4. Given a date X, find the projects that ended before X and the number of grants
+that funded each project.""")
+        print("""5. Find the three most productive years in terms of publications produced by
+students.""")
         print("Or type EXIT to exit.")
 
         # Get Input
@@ -524,7 +592,13 @@ def grant_publication_reporting():
             choice_wip()
         elif choice == "2":
             choice_wip()
-        elif choice == "EXIT":
+        elif choice == "3":
+            choice_wip()
+        elif choice == "4":
+            choice_wip()
+        elif choice == "5":
+            choice_wip()
+        elif choice.upper() == "EXIT":
             sys.exit()
 
 main_menu()
