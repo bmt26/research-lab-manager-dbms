@@ -128,7 +128,7 @@ def manipulate_db(sql, val):
     # Close Connection
     conn.close()
 
-# TEMP
+# WIP
 # Get the table for a specific format for creation
 def create_table_format(query):
     try:
@@ -313,13 +313,89 @@ def read_table(table_title):
     table_structure = query_db("DESCRIBE " + table_title)
     table_attributes = [inner[0] for inner in table_structure]
 
-    # Query and Display Results
-    for row in query_db(
-        """
+    # Declare variables
+    filter_attr = None
+    filter_value = None
+    filter_bool = False
+
+    # Loop through input options
+    while True:
+        # Text
+        print(f"\nWould you like to filter results by attributes of a specific value?")
+        print("y. Yes")
+        print("n. No")
+        print("Or type EXIT to exit")
+
+        # Get Input
+        choice = input("Choose an option: ")
+
+        # Evaluate Input
+        if choice.upper() == "N":
+            break
+        elif choice.upper() == "EXIT":
+            sys.exit()
+        elif choice.upper() == "Y":
+            filter_bool = True
+            break
+        else:
+            continue
+
+    # If filtering is desired
+    if filter_bool:
+        # Loop through input options
+        while True:
+            # Text
+            print("\nWhich attribute do you want to filter by?")
+            print(table_attributes[0], end="")
+            for attribute in table_attributes[1:]:
+                print(", " + attribute, end="")
+            print(" ")
+            print("Or type 0 to go back.")
+            print("Or type EXIT to exit.")
+
+            # Get Input
+            choice = input("Choose an option: ")
+
+            # Evaluate Input
+            if choice == "0":
+                return
+            elif choice == "EXIT":
+                sys.exit()
+            elif choice.upper() in table_attributes:
+                filter_attr = choice.upper()
+                break
+
+        # Store the filter attribute data type
+        data_type = table_structure[table_attributes.index(filter_attr)][1]
+
+        # Loop through input options
+        while True:
+            # Text
+            print(f"\nWhat value do you want to filter {filter_attr} by?")
+            print(filter_attr + ": " + data_type)
+
+            # Get Input
+            choice = input("Choose an option: ")
+
+            # Evaluate Input
+            check_results = check_attribute_value_format(data_type, choice)
+            if (check_results[0] == 1):
+                filter_value = check_results[1]
+                break
+
+    query = f"""
         SELECT *
-        FROM """ + table_title + """
+        FROM {table_title}
         """
-    ):
+    if filter_bool:
+        query += f"WHERE {filter_attr} = '{filter_value}'"
+
+    # Query and Display Results
+    print(f"({table_attributes[0]}", end="")
+    for i in table_attributes[1:]:
+        print(f", {i}", end="")
+    print(")")
+    for row in query_db(query):
         print(row)
 
 # Update Function for all tables
@@ -461,7 +537,7 @@ def update_table(table_title):
         choice = input("Choose an option: ")
 
         # Evaluate Input
-        if choice == "n":
+        if choice.upper() == "N":
             return
         elif choice.upper() == "EXIT":
             sys.exit()

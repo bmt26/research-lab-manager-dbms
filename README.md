@@ -2,20 +2,8 @@
 
 ## ToDo:
 
-* Fix Read
-
-  * Add Top row for attribute names
-  * Read Table Customization
-
-    * Select: Which attributes wanted returned?
-    * Where: Filter by condition
-    * Order By: Sort by attribute
-    * Group By:
-    * Having: Filter Group By (Seems complicated)
-    * Aggregate Functions: Count, Sum, Avg, min, max
 * Cascading Update/Delete
 * Special Case for Lab Member CRUD
-* Custom CRUD?
 
 
 
