@@ -1118,6 +1118,10 @@ def crud_member_projects():
         print("RP. Read Project")
         print("UP. Update Project")
         print("DP. Delete Project")
+        print("CW. Create Works")
+        print("RW. Read Works")
+        print("UW. Update Works")
+        print("DW. Delete Works")
         print("Or type EXIT to exit.")
 
         # Get Input
@@ -1142,6 +1146,14 @@ def crud_member_projects():
             update_table("PROJECT")
         elif choice.upper() == "DP":
             delete_table("PROJECT")
+        elif choice.upper() == "CW":
+            create_table("WORKS")
+        elif choice.upper() == "RW":
+            read_table("WORKS")
+        elif choice.upper() == "UW":
+            update_table("WORKS")
+        elif choice.upper() == "DW":
+            delete_table("WORKS")
         elif choice.upper() == "EXIT":
             sys.exit()
 
