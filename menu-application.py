@@ -477,6 +477,7 @@ def update_table(table_title):
     update_attr = None
     update_value = None
 
+
     # Get Table Structure
     table_structure = query_db("DESCRIBE " + table_title)
     table_attributes = [inner[0] for inner in table_structure]
@@ -622,13 +623,35 @@ def delete_table(table_title):
         print("    --- CRUD Grants/Publications")
     print(f"      --- Delete {table_title}")
 
-    # Declare variables
-    filter_attr = None
-    filter_value = None
-
     # Get Table Structure
     table_structure = query_db("DESCRIBE " + table_title)
     table_attributes = [inner[0] for inner in table_structure]
+
+    # Declare variables
+    # Generic
+    filter_attr = None
+    filter_value = None
+    sql = None
+    val = None
+
+    # Subclass Specific
+    sub_bool = False
+    sub_tables_title = None
+    sub_tables_structure = None
+    sub_tables_attributes = None
+    sub_table_selected = None
+
+    # Get Sub Table Structures
+    if table_title == "LAB_MEMBER":
+        sub_bool = True
+        sub_tables_title = ["STUDENT", "FACULTY", "COLLABORATOR"]
+        # Exclude MID (Foreign Key from Lab Member, so redundant)
+        sub_tables_structure = [query_db("DESCRIBE " + sub_tables_title[0])[1:],
+                                query_db("DESCRIBE " + sub_tables_title[1])[1:],
+                                query_db("DESCRIBE " + sub_tables_title[2])[1:]]
+        sub_tables_attributes = [[inner[0] for inner in sub_tables_structure[0]],
+                                 [inner[0] for inner in sub_tables_structure[1]],
+                                 [inner[0] for inner in sub_tables_structure[2]]]
 
     # Loop through input options
     while True:
@@ -637,6 +660,11 @@ def delete_table(table_title):
         print(table_attributes[0], end="")
         for attribute in table_attributes[1:]:
             print(", " + attribute, end="")
+        if sub_bool:
+            for sub_table_attributes in sub_tables_attributes:
+                print(" \n     ", end="")
+                for sub_attribute in sub_table_attributes:
+                    print(", " + sub_attribute, end="")
         print(" ")
         print("Or type 0 to go back.")
         print("Or type EXIT to exit.")
@@ -650,11 +678,29 @@ def delete_table(table_title):
         elif choice == "EXIT":
             sys.exit()
         elif choice.upper() in table_attributes:
+            # Store the filter attribute data type
             filter_attr = choice.upper()
+            data_type = table_structure[table_attributes.index(filter_attr)][1]
             break
-
-    # Store the filter attribute data type
-    data_type = table_structure[table_attributes.index(filter_attr)][1]
+        elif sub_bool:
+            if choice.upper() in sub_tables_attributes[0]:
+                # Store the filter attribute data type
+                filter_attr = choice.upper()
+                data_type = sub_tables_structure[0][sub_tables_attributes[0].index(filter_attr)][1]
+                sub_table_selected = 0
+                break
+            elif choice.upper() in sub_tables_attributes[1]:
+                # Store the filter attribute data type
+                filter_attr = choice.upper()
+                data_type = sub_tables_structure[1][sub_tables_attributes[1].index(filter_attr)][1]
+                sub_table_selected = 1
+                break
+            elif choice.upper() in sub_tables_attributes[2]:
+                # Store the filter attribute data type
+                filter_attr = choice.upper()
+                data_type = sub_tables_structure[2][sub_tables_attributes[2].index(filter_attr)][1]
+                sub_table_selected = 2
+                break
 
     # Loop through input options
     while True:
@@ -672,7 +718,37 @@ def delete_table(table_title):
             break
 
     # Prepare Data Manipulation SQL and Val parameters
-    sql = f"DELETE FROM {table_title} WHERE {filter_attr} = %s"
+    if sub_bool:
+        if sub_table_selected == 0:
+            sql = f"""
+            DELETE FROM LAB_MEMBER
+            WHERE MID IN 
+            (
+                SELECT MID 
+                FROM STUDENT 
+                WHERE {filter_attr} = %s
+            );"""
+        if sub_table_selected == 1:
+            sql = f"""
+            DELETE FROM LAB_MEMBER
+            WHERE MID IN 
+            (
+                SELECT MID 
+                FROM FACULTY 
+                WHERE {filter_attr} = %s
+            );"""
+        if sub_table_selected == 2:
+            sql = f"""
+            DELETE FROM LAB_MEMBER
+            WHERE MID IN 
+            (
+                SELECT MID 
+                FROM COLLABORATOR 
+                WHERE {filter_attr} = %s
+            );"""
+    else:
+        sql = f"DELETE FROM {table_title} WHERE {filter_attr} = %s"
+
     val = [filter_value]
 
     # Loop through input options
@@ -680,7 +756,7 @@ def delete_table(table_title):
         # Text
         print(f"\nIs this correct?")
         print(f"sql = {sql}")
-        print(f"fal = {val}")
+        print(f"val = {val}")
         print("y. Yes (Apply Delete)")
         print("n. No (Go back WITHOUT SAVING)")
         print("Or type EXIT to exit WITHOUT SAVING.")
