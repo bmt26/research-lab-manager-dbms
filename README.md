@@ -2,12 +2,13 @@
 
 ## ToDo:
 
-* Cascading Update/Delete
 * Add MENU Works to CRUD
 * Lab Member CRUD
 
-  * Update
-  * Delete (Might Be Fixed with Cascade)
+  * Update - Filter by and Update Child Class Attributes
+
+    * Add option to switch Type from one child class to another
+  * Delete - Filter by Child Class Attributes
 
 
 
