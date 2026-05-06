@@ -60,6 +60,7 @@ def check_attribute_value_format(data_type, value):
             return (1, value)
         except ValueError:
             print(f"Error: {value} is an invalid {data_type}")
+            return (0, None)
 
     # Date
     elif data_type == "date":
@@ -68,10 +69,7 @@ def check_attribute_value_format(data_type, value):
             return (1, value)
         except ValueError:
             print(f"Error: {value} is an invalid {data_type}, date formatted as YYYY-MM-DD")
-        #if re.fullmatch(r"\d{4}-\d{2}-\d{2}", value):
-        #
-        #else:
-       #
+            return (0, None)
 
     # Varchar(#) (String)
     elif re.fullmatch(r"varchar\(\d+\)", data_type):
@@ -83,7 +81,10 @@ def check_attribute_value_format(data_type, value):
             return (1, value)
         else:
             print(f"Error: {value} is an invalid {data_type}, too long")
-    return (0, None)
+            return (0, None)
+
+    # Unsupported data type, try anyways
+    return (1, value)
 
 # Query the Database with parameter "query"
 def query_db(query):
@@ -426,17 +427,21 @@ def update_table(table_title):
     # Loop through input options
     while True:
         # Text
-        print(f"\nWhat value do you want to update {update_attr} to?")
-        print(update_attr + ": " + data_type)
+        print(f"\nWhat value do you want to update {update_attr}: {data_type} to?")
+        print("Or press ENTER for NULL.")
 
         # Get Input
         choice = input("Choose an option: ")
 
         # Evaluate Input
-        check_results = check_attribute_value_format(data_type, choice)
-        if (check_results[0] == 1):
-            update_value = check_results[1]
+        if choice == "":
+            update_value = None
             break
+        else:
+            check_results = check_attribute_value_format(data_type, choice)
+            if (check_results[0] == 1):
+                update_value = check_results[1]
+                break
 
     # Prepare Data Manipulation SQL and Val parameters
     sql = f"UPDATE {table_title} SET {update_attr} = %s WHERE {filter_attr} = %s"

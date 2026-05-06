@@ -4,6 +4,7 @@
 
 * Fix Read
 
+  * Add Top row for attribute names
   * Read Table Customization
 
     * Select: Which attributes wanted returned?
@@ -13,10 +14,8 @@
     * Having: Filter Group By (Seems complicated)
     * Aggregate Functions: Count, Sum, Avg, min, max
 * Cascading Update/Delete
-* Special Case for Labmember CRUD
+* Special Case for Lab Member CRUD
 * Custom CRUD?
-* Allow for NULL inserts and updates
-* Double Check CRUD still Works
 
 
 
