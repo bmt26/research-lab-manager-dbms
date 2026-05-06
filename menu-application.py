@@ -562,30 +562,51 @@ def display_equipment_usage():
         print("\n--- Research Lab Manager DBMS")
         print("  --- Equipment Usage Tracking")
         print("    --- Display Equipment Usage")
-        print("0. Back")
-        print("1. Sample Query")
+        print("Enter a Equipment ID number to view its status")
+        print("Or type ALL to view project status")
+        print("Or type B to go Back")
         print("Or type EXIT to exit.")
+
+        # Declare variables
+        eid = None
 
         # Get Input
         choice = input("Choose an option: ")
 
         # Evaluate Input
-        if choice == "0":
-            break
-        elif choice == "EXIT":
+        if choice.upper() == "B":
+            return
+        elif choice.upper() == "EXIT":
             sys.exit()
-        elif choice == "1":
-            pass
+        elif choice.upper() == "ALL":
+            eid = "e.eid"
         else:
-            continue
+            print("hello")
+            check = check_attribute_value_format("int", choice)
+            if (check[0] == 1):
+                print("hello again")
+                eid = choice
+            else:
+                continue
 
         # Query and Display Results
-        print("(WIP)")
+        print("(MID, MEMBER NAME, EQUIPMENT NAME, TITLE, PURPOSE)")
         for row in query_db(
-            """
-            SELECT true
-            FROM dual
-            WHERE false;
+            f"""
+            SELECT
+                lm.MID,
+                lm.NAME AS member_name,
+                e.E_NAME AS equipment_name,
+                p.TITLE AS project_title,
+                u.PURPOSE AS usage_purpose
+            FROM USES u
+            JOIN LAB_MEMBER lm ON u.MID = lm.MID
+            JOIN DEVICE d ON u.DID = d.DID AND u.EID = d.EID
+            JOIN EQUIPMENT e ON d.EID = e.EID
+            JOIN WORKS w ON lm.MID = w.MID
+            JOIN PROJECT p ON w.PID = p.PID
+            WHERE e.EID = {eid}
+                AND u.E_DATE IS NULL;
             """
         ):
             print(row)
@@ -810,7 +831,7 @@ def main_menu():
             grant_publication_reporting()
         elif choice.upper() == "T":
             print(TABLE_TITLES)
-            delete_table(input("Enter a Table Name: "))
+            display_equipment_usage()
         elif choice.upper() == "EXIT":
             sys.exit()
 

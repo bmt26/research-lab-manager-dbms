@@ -19,7 +19,6 @@
   * Equipment Usage Tracking
 
     * Equipment Status
-    * Member Equipment
   * Grant and Publication Reporting
 
     * Top 5 Projects
