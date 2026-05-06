@@ -590,10 +590,8 @@ def display_equipment_usage():
         elif choice.upper() == "ALL":
             eid = "e.eid"
         else:
-            print("hello")
             check = check_attribute_value_format("int", choice)
             if (check[0] == 1):
-                print("hello again")
                 eid = choice
             else:
                 continue
@@ -714,30 +712,43 @@ def display_completed_projects():
         print("\n--- Research Lab Manager DBMS")
         print("  --- Grant and Publication Reporting")
         print("    --- Display Completed Projects")
-        print("0. Back")
-        print("1. Sample Query")
+        print("Enter a end date filter projects by")
+        print("Or type B to go Back")
         print("Or type EXIT to exit.")
+
+        # Declare variables
+        choice_date = None
 
         # Get Input
         choice = input("Choose an option: ")
 
         # Evaluate Input
-        if choice == "0":
-            break
-        elif choice == "EXIT":
+        if choice.upper() == "B":
+            return
+        elif choice.upper() == "EXIT":
             sys.exit()
-        elif choice == "1":
-            pass
         else:
-            continue
+            check = check_attribute_value_format("date", choice)
+            if (check[0] == 1):
+                choice_date = choice
+            else:
+                continue
 
         # Query and Display Results
-        print("(WIP)")
+        print("(PID, TITLE, END_DATE, GRANT COUNTS)")
         for row in query_db(
-            """
-            SELECT true
-            FROM dual
-            WHERE false;
+            f"""
+            SELECT
+                p.PID,
+                p.TITLE AS project_title,
+                p.E_DATE AS end_date,
+                COUNT(g.GID) AS grant_count
+            FROM PROJECT p
+            LEFT JOIN `GRANT` g ON p.PID = g.PID
+            WHERE p.E_DATE < '{choice_date}'
+            GROUP BY p.PID, p.TITLE, p.E_DATE
+            ORDER BY p.E_DATE;
+
             """
         ):
             print(row)
