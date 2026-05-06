@@ -525,30 +525,39 @@ def display_equipment_status():
         print("\n--- Research Lab Manager DBMS")
         print("  --- Equipment Usage Tracking")
         print("    --- Display Equipment Status")
-        print("0. Back")
-        print("1. Sample Query")
+        print("Enter a Equipment ID number to view its status")
+        print("Or type ALL to view Equipment status")
+        print("Or type B to go Back")
         print("Or type EXIT to exit.")
+
+        # Declare variables
+        eid = None
 
         # Get Input
         choice = input("Choose an option: ")
 
         # Evaluate Input
-        if choice == "0":
-            break
-        elif choice == "EXIT":
+        if choice.upper() == "B":
+            return
+        elif choice.upper() == "EXIT":
             sys.exit()
-        elif choice == "1":
-            pass
+        elif choice.upper() == "ALL":
+            eid = "eid"
         else:
-            continue
+            check = check_attribute_value_format("int", choice)
+            if (check[0]==1):
+                eid = choice
+            else:
+                continue
 
         # Query and Display Results
-        print("(WIP)")
+        print("(EID, EQUIPMENT NAME, DEVICE ID, STATUS)")
         for row in query_db(
-            """
-            SELECT true
-            FROM dual
-            WHERE false;
+            f"""
+            SELECT eid, e_name, did, status
+            FROM equipment
+            NATURAL JOIN device
+            WHERE eid = {eid}
             """
         ):
             print(row)
@@ -830,8 +839,9 @@ def main_menu():
         elif choice == "3":
             grant_publication_reporting()
         elif choice.upper() == "T":
-            print(TABLE_TITLES)
-            display_equipment_usage()
+            #print(TABLE_TITLES)
+            #function(input("Text: ").upper())
+            display_equipment_status()
         elif choice.upper() == "EXIT":
             sys.exit()
 
