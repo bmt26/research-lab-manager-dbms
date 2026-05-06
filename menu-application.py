@@ -297,9 +297,6 @@ def create_table(table_title):
         sub_sql = f"INSERT INTO {sub_table_title} {sub_table_format} VALUES {sub_table_values}"
         sub_val = tuple(sub_values)
 
-    # sql = "INSERT INTO users (name, age) VALUES (?, ?)"
-    # values = ("Alice", 30)
-
     # Loop through input options
     while True:
         # Text
@@ -356,6 +353,7 @@ def read_table(table_title):
         print("    --- CRUD Grants/Publications")
     print(f"      --- Read {table_title}")
 
+
     # Get Table Structure
     table_structure = query_db("DESCRIBE " + table_title)
     table_attributes = [inner[0] for inner in table_structure]
@@ -364,6 +362,23 @@ def read_table(table_title):
     filter_attr = None
     filter_value = None
     filter_bool = False
+    sub_bool = False
+    sub_tables_title = None
+    sub_tables_structure = None
+
+    data_type = None
+
+    # Get Sub Table Structures
+    if table_title == "LAB_MEMBER":
+        sub_bool = True
+        sub_tables_title = ["STUDENT", "FACULTY", "COLLABORATOR"]
+        # Exclude MID (Foreign Key from Lab Member, so redundant)
+        sub_tables_structure = [query_db("DESCRIBE " + sub_tables_title[0])[1:],
+                                query_db("DESCRIBE " + sub_tables_title[1])[1:],
+                                query_db("DESCRIBE " + sub_tables_title[2])[1:]]
+        sub_tables_attributes = [[inner[0] for inner in sub_tables_structure[0]],
+                                [inner[0] for inner in sub_tables_structure[1]],
+                                [inner[0] for inner in sub_tables_structure[2]]]
 
     # Loop through input options
     while True:
@@ -396,6 +411,11 @@ def read_table(table_title):
             print(table_attributes[0], end="")
             for attribute in table_attributes[1:]:
                 print(", " + attribute, end="")
+            if sub_bool:
+                for sub_table_attributes in sub_tables_attributes:
+                    print(" \n     ", end="")
+                    for sub_attribute in sub_table_attributes:
+                        print(", " + sub_attribute, end="")
             print(" ")
             print("Or type 0 to go back.")
             print("Or type EXIT to exit.")
@@ -409,11 +429,27 @@ def read_table(table_title):
             elif choice == "EXIT":
                 sys.exit()
             elif choice.upper() in table_attributes:
+                # Store the filter attribute data type
                 filter_attr = choice.upper()
+                data_type = table_structure[table_attributes.index(filter_attr)][1]
                 break
+            elif sub_bool:
+                if choice.upper() in sub_tables_attributes[0]:
+                    # Store the filter attribute data type
+                    filter_attr = choice.upper()
+                    data_type = sub_tables_structure[0][sub_tables_attributes[0].index(filter_attr)][1]
+                    break
+                elif choice.upper() in sub_tables_attributes[1]:
+                    # Store the filter attribute data type
+                    filter_attr = choice.upper()
+                    data_type = sub_tables_structure[1][sub_tables_attributes[1].index(filter_attr)][1]
+                    break
+                elif choice.upper() in sub_tables_attributes[2]:
+                    # Store the filter attribute data type
+                    filter_attr = choice.upper()
+                    data_type = sub_tables_structure[2][sub_tables_attributes[2].index(filter_attr)][1]
+                    break
 
-        # Store the filter attribute data type
-        data_type = table_structure[table_attributes.index(filter_attr)][1]
 
         # Loop through input options
         while True:
@@ -430,20 +466,51 @@ def read_table(table_title):
                 filter_value = check_results[1]
                 break
 
-    query = f"""
-        SELECT *
-        FROM {table_title}
-        """
-    if filter_bool:
-        query += f"WHERE {filter_attr} = '{filter_value}'"
+    if sub_bool:
+        for i in range(len(sub_tables_title)):
+            query = f"""
+                SELECT *
+                FROM {table_title}
+                NATURAL JOIN {sub_tables_title[i]}
+                """
+            if filter_bool:
+                query += f"WHERE {filter_attr} = '{filter_value}'"
 
-    # Query and Display Results
-    print(f"({table_attributes[0]}", end="")
-    for i in table_attributes[1:]:
-        print(f", {i}", end="")
-    print(")")
-    for row in query_db(query):
-        print(row)
+            # Query and Display Results
+            print(f"\n{sub_tables_title[i]}/s")
+            print(f"({table_attributes[0]}", end="")
+            for attribute in table_attributes[1:]:
+                print(f", {attribute}", end="")
+            for sub_attribute in sub_tables_attributes[i]:
+                print(f", {sub_attribute}", end="")
+            print(")")
+            query_results = query_db(query)
+            if query_results == None:
+                print("No Results Found")
+            else:
+                for row in query_results:
+                    print(row)
+    else:
+        query = f"""
+                SELECT *
+                FROM {table_title}
+                """
+        if filter_bool:
+            query += f"WHERE {filter_attr} = '{filter_value}'"
+
+        # Query and Display Results
+
+        print(f"\n{table_title}/s")
+        print(f"({table_attributes[0]}", end="")
+        for i in table_attributes[1:]:
+            print(f", {i}", end="")
+        print(")")
+        query_results = query_db(query)
+        if query_results == None:
+            print("No Results Found")
+        else:
+            for row in query_results:
+                print(row)
 
 # Update Function for all tables
 def update_table(table_title):
@@ -1062,12 +1129,10 @@ def main_menu():
             equipment_usage_tracking()
         elif choice == "3":
             grant_publication_reporting()
-        elif choice.upper() == "C":
-            print(TABLE_TITLES)
-            create_table(input("Enter Table for creating: ").upper())
-        elif choice.upper() == "C":
-            print(TABLE_TITLES)
-            read_table(input("Enter Table for reading: ").upper())
+        elif choice.upper() == "T":
+            # print(TABLE_TITLES)
+            # read_table(input("Enter Table for reading: ").upper())
+            read_table("LAB_MEMBER")
         elif choice.upper() == "EXIT":
             sys.exit()
 

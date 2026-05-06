@@ -3,9 +3,8 @@
 ## ToDo:
 
 * Cascading Update/Delete
-* Lab Member Crud
+* Lab Member CRUD
 
-  * Read
   * Update
   * Delete (Might Be Fixed with Cascade)
 
