@@ -8,14 +8,3 @@
 4. Create a file named .env in Working Directory and insert in it "DB\_PASSWORD=\[Password]" but replace \[Password] with your password (without brackets)
 5. Run Menu Application: > python menu-application.py
 
-
-
-## To Do:
-
-* Lab Member CRUD
-
-  * Update - Filter by and Update Child Class Attributes
-
-    * Add option to switch Type from one child class to another
-  * Delete - Filter by Child Class Attributes
-
