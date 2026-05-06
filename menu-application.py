@@ -127,6 +127,162 @@ def manipulate_db(sql, val):
     # Close Connection
     conn.close()
 
+# TEMP
+# Get the table for a specific format for creation
+def create_table_format(query):
+    try:
+        conn = connect_db()
+        cursor = conn.cursor()
+        cursor.execute(query);
+
+        query_result = [item[0] for item in cursor.fetchall()]
+
+        conn.close()
+        return query_result
+
+        conn.close()
+    except Exception as e:
+        print("Error:", e)
+
+# WIP
+def create_table_OLD(tn):
+    tables = ["student", "faculty", "collaborator"]
+    query_result = [None] * len(tables)
+    for i in range(len(tables)):
+        query_result[i] = create_table_format(
+            f"""
+                SELECT COLUMN_NAME
+                FROM (SELECT COLUMN_NAME,
+                            MIN(CASE WHEN TABLE_NAME = 'lab_member' THEN 1 ELSE 2 END) AS table_priority,
+                            MIN(ORDINAL_POSITION)                                      AS position_priority
+                     FROM INFORMATION_SCHEMA.COLUMNS
+                     WHERE TABLE_NAME IN ('lab_member', '{tables[i]}')
+                     GROUP BY COLUMN_NAME) AS C
+                ORDER BY table_priority, position_priority;
+            """
+        )
+
+    while True:
+        print("Following the format to create a student, faculty, or collaborator entry:")
+        for i in range(len(query_result)):
+            print(tables[i], end=": ")
+            print("(" + query_result[i][0], end="")
+            for j in query_result[i][1:]:
+                print(", " + j, end="")
+            print(")")
+        print("Or type EXIT to exit.")
+
+        choice = input("Enter: ")
+        choice_split = choice.split(", ")
+        if choice == "EXIT":
+            sys.exit()
+        elif choice_split[3] == "\"Student\"":
+            print("working")
+            lab_member_values= choice_split[0]
+            for i in range(6):
+                lab_member_values += ", " +choice_split[i+1]
+            lab_member_values += ")"
+            student_values=choice_split[0]
+            for i in range(3):
+                student_values += ", " +choice_split[i+7]
+
+            query = "INSERT INTO lab_member VALUES" + lab_member_values + ";"
+            print(query)
+            query_db(query)
+            query = "INSERT INTO student VALUES" + student_values + ";"
+            print(query)
+            query_db(query)
+
+# Create Function for all tables
+def create_table(table_title):
+    # Reformat to allow any case
+    table_title = table_title.upper()
+
+    # Ensure table_title is a valid title
+    if table_title is None or table_title.upper() not in TABLE_TITLES:
+        print("\nError: Invalid selection \"" + table_title + "\" for table title")
+        return
+
+    # Text
+    if table_title in ["COLLABORATOR", "FACULTY", "LAB_MEMBER", "PROJECT", "STUDENT", "WORKS"]:
+        print("\n--- Research Lab Manager DBMS")
+        print("  --- Project and Member Management")
+        print("    --- CRUD Members/Projects")
+    elif table_title in ["DEVICE", "EQUIPMENT", "USES"]:
+        print("\n--- Research Lab Manager DBMS")
+        print("  --- Equipment Usage Tracking")
+        print("    --- CRUD Equipment/Equipment Usage")
+    elif table_title in ["`GRANT`", "PUBLICATION", "PUBLISHES"]:
+        print("\n--- Research Lab Manager DBMS")
+        print("  --- Grant and Publication Reporting")
+        print("    --- CRUD Grants/Publications")
+    print(f"      --- Create {table_title}")
+
+    # Get Table Structure
+    table_structure = query_db("DESCRIBE " + table_title)
+
+    # Declare variables
+    values = [None] * len(table_structure)
+
+    print("Table Structure:")
+    for row in table_structure:
+        print(row)
+
+    # Loop Through each attribute
+    for i in range(len(table_structure)):
+        # Loop through input options
+        while True:
+            # Text
+            print(f"\nWhat do you want to set [{table_structure[i][0]}: {table_structure[i][1]}] to?")
+            print("Or press ENTER for NULL.")
+
+            # Get Input
+            choice = input("Choose an option: ")
+
+            # Evaluate Input
+            if choice == "":
+                break
+            else:
+                check_results = check_attribute_value_format(table_structure[i][1], choice)
+                if (check_results[0] == 1):
+                    values[i] = check_results[1]
+                    break
+
+    # Prepare Data Manipulation SQL and Val parameters
+    table_format = "(" + ", ".join([inner[0] for inner in table_structure]) + ")"
+    table_values = "(" + ", ".join(["%s"] * len(table_structure)) + ")"
+    sql = f"INSERT INTO {table_title} {table_format} VALUES {table_values}"
+    val = tuple(values)
+
+    # sql = "INSERT INTO users (name, age) VALUES (?, ?)"
+    # values = ("Alice", 30)
+
+    # Loop through input options
+    while True:
+        # Text
+        print(f"\nIs this correct?")
+        print(f"sql = {sql}")
+        print(f"val = {val}")
+        print("y. Yes (Apply Creation)")
+        print("n. No (Go back WITHOUT SAVING)")
+        print("Or type EXIT to exit WITHOUT SAVING.")
+
+        # Get Input
+        choice = input("Choose an option: ")
+
+        # Evaluate Input
+        if choice == "n":
+            return
+        elif choice.upper() == "EXIT":
+            sys.exit()
+        elif choice.upper() == "Y":
+            break
+        else:
+            continue
+
+    # Send Data Manipulation
+    manipulate_db(sql, val)
+
 # Read Function for all tables
 def read_table(table_title):
     # Reformat to allow any case
@@ -291,7 +447,7 @@ def update_table(table_title):
         # Text
         print(f"\nIs this correct?")
         print(f"sql = {sql}")
-        print(f"fal = {val}")
+        print(f"val = {val}")
         print("y. Yes (Apply Update)")
         print("n. No (Go back WITHOUT SAVING)")
         print("Or type EXIT to exit WITHOUT SAVING.")
@@ -308,15 +464,6 @@ def update_table(table_title):
             break
         else:
             continue
-
-        # Get Input
-        choice = input("Choose an option: ")
-
-        # Evaluate Input
-        check_results = check_attribute_value_format(data_type, choice)
-        if (check_results[0] == 1):
-            update_value = check_results[1]
-            break
 
     # Send Data Manipulation
     manipulate_db(sql, val)
@@ -349,8 +496,6 @@ def delete_table(table_title):
     # Declare variables
     filter_attr = None
     filter_value = None
-    update_attr = None
-    update_value = None
 
     # Get Table Structure
     table_structure = query_db("DESCRIBE " + table_title)
@@ -423,15 +568,6 @@ def delete_table(table_title):
             break
         else:
             continue
-
-        # Get Input
-        choice = input("Choose an option: ")
-
-        # Evaluate Input
-        check_results = check_attribute_value_format(data_type, choice)
-        if (check_results[0] == 1):
-            update_value = check_results[1]
-            break
 
     # Send Data Manipulation
     manipulate_db(sql, val)
@@ -515,7 +651,6 @@ def display_mentor_mentee_collaboration():
         """
     ):
         print(row)
-
 
 # Show status of a piece of equipment
 def display_equipment_status():
@@ -778,89 +913,6 @@ def display_productive_years():
     ):
         print(row)
 
-# WIP
-# Insert into Database with parameter "query"
-def insert_db(query):
-    try:
-        conn = connect_db()
-        cursor = conn.cursor()
-        cursor.execute(query);
-
-        for row in cursor.fetchall():
-            print(row)
-
-        db.commit()
-        print(cursor.rowcount, "record inserted.")
-
-        conn.close()
-    except Exception as e:
-        print("Error:", e)
-
-# TEMP
-# Get the table for a specific format for creation
-def create_table_format(query):
-    try:
-        conn = connect_db()
-        cursor = conn.cursor()
-        cursor.execute(query);
-
-        query_result = [item[0] for item in cursor.fetchall()]
-
-        conn.close()
-        return query_result
-
-        conn.close()
-    except Exception as e:
-        print("Error:", e)
-
-# WIP
-def create_member(tn):
-    query_result = [None] * len(tables)
-    for i in range(len(tables)):
-        query_result[i] = create_table_format(
-            """
-                SELECT COLUMN_NAME
-                FROM (SELECT COLUMN_NAME,
-                            MIN(CASE WHEN TABLE_NAME = 'lab_member' THEN 1 ELSE 2 END) AS table_priority,
-                            MIN(ORDINAL_POSITION)                                      AS position_priority
-                     FROM INFORMATION_SCHEMA.COLUMNS
-                     WHERE TABLE_NAME IN ('lab_member', '""" + tables[i] + """')
-                     GROUP BY COLUMN_NAME) AS C
-                ORDER BY table_priority, position_priority;
-            """
-        )
-
-    while True:
-        print("Following the format to create a student, faculty, or collaborator entry:")
-        for i in range(len(query_result)):
-            print(tables[i], end=": ")
-            print("(" + query_result[i][0], end="")
-            for j in query_result[i][1:]:
-                print(", " + j, end="")
-            print(")")
-        print("Or type EXIT to exit.")
-
-        choice = input("Enter: ")
-        choice_split = choice.split(", ")
-        if choice == "EXIT":
-            sys.exit()
-        elif choice_split[3] == "\"Student\"":
-            print("working")
-            lab_member_values= choice_split[0]
-            for i in range(6):
-                lab_member_values += ", " +choice_split[i+1]
-            lab_member_values += ")"
-            student_values=choice_split[0]
-            for i in range(3):
-                student_values += ", " +choice_split[i+7]
-
-            query = "INSERT INTO lab_member VALUES" + lab_member_values + ";"
-            print(query)
-            query_db(query)
-            query = "INSERT INTO student VALUES" + student_values + ";"
-            print(query)
-            query_db(query)
-
 # Text Menu
 def main_menu():
     # Loop display message waiting on user input
@@ -882,10 +934,12 @@ def main_menu():
             equipment_usage_tracking()
         elif choice == "3":
             grant_publication_reporting()
-        elif choice.upper() == "T":
-            #print(TABLE_TITLES)
-            #function(input("Text: ").upper())
-            display_top_mentor()
+        elif choice.upper() == "C":
+            print(TABLE_TITLES)
+            create_table(input("Enter Table for creating: ").upper())
+        elif choice.upper() == "C":
+            print(TABLE_TITLES)
+            read_table(input("Enter Table for reading: ").upper())
         elif choice.upper() == "EXIT":
             sys.exit()
 
@@ -946,21 +1000,21 @@ def crud_member_projects():
         if choice == "0":
             break
         elif choice.upper() == "CM":
-            choice_wip()
+            create_table("LAB_MEMBER")
         elif choice.upper() == "RM":
             read_table("LAB_MEMBER")
         elif choice.upper() == "UM":
             update_table("LAB_MEMBER")
         elif choice.upper() == "DM":
-            choice_wip()
+            delete_table("LAB_MEMBER")
         elif choice.upper() == "CP":
-            choice_wip()
+            create_table("PROJECT")
         elif choice.upper() == "RP":
             read_table("PROJECT")
         elif choice.upper() == "UP":
             update_table("PROJECT")
         elif choice.upper() == "DP":
-            choice_wip()
+            delete_table("PROJECT")
         elif choice.upper() == "EXIT":
             sys.exit()
 
@@ -1022,29 +1076,29 @@ def crud_equipment():
         if choice == "0":
             break
         elif choice.upper() == "CE":
-            choice_wip()
+            create_table("EQUIPMENT")
         elif choice.upper() == "RE":
             read_table("EQUIPMENT")
         elif choice.upper() == "UE":
             update_table("EQUIPMENT")
         elif choice.upper() == "DE":
-            choice_wip()
+            delete_table("EQUIPMENT")
         elif choice.upper() == "CD":
-            choice_wip()
+            create_table("DEVICE")
         elif choice.upper() == "RD":
             read_table("DEVICE")
         elif choice.upper() == "UD":
             update_table("DEVICE")
         elif choice.upper() == "DD":
-            choice_wip()
+            delete_table("DEVICE")
         elif choice.upper() == "CU":
-            choice_wip()
+            create_table("USES")
         elif choice.upper() == "RU":
             read_table("USES")
         elif choice.upper() == "UU":
             update_table("USES")
         elif choice.upper() == "DU":
-            choice_wip()
+            delete_table("USES")
         elif choice.upper() == "EXIT":
             sys.exit()
 
@@ -1056,16 +1110,17 @@ def grant_publication_reporting():
         print("\n--- Research Lab Manager DBMS")
         print("  --- Grant and Publication Reporting")
         print("0. Back")
-        print("""1. List the top 5 projects ranked by their total grant funding, and show the total
+        print("1. Create/Read/Update/Delete Grants and Publications")
+        print("""2. List the top 5 projects ranked by their total grant funding, and show the total
 amount each project received, in decreasing order of total funding (assume
 Budget is the dollar amount of each grant).""")
-        print("""2. Find the mentor(s) whose mentees collectively produced the largest number of
+        print("""3. Find the mentor(s) whose mentees collectively produced the largest number of
 publications.""")
-        print("""3. Calculate the total number of student publications per major and per publication
+        print("""4. Calculate the total number of student publications per major and per publication
 year.""")
-        print("""4. Given a date X, find the projects that ended before X and the number of grants
+        print("""5. Given a date X, find the projects that ended before X and the number of grants
 that funded each project.""")
-        print("""5. Find the three most productive years in terms of publications produced by
+        print("""6. Find the three most productive years in terms of publications produced by
 students.""")
         print("Or type EXIT to exit.")
 
@@ -1076,15 +1131,73 @@ students.""")
         if choice == "0":
             break
         elif choice == "1":
-            display_top_five_projects()
+            crud_grant_publications()
         elif choice == "2":
-            display_top_mentor()
+            display_top_five_projects()
         elif choice == "3":
-            display_student_publications()
+            display_top_mentor()
         elif choice == "4":
-            display_completed_projects()
+            display_student_publications()
         elif choice == "5":
+            display_completed_projects()
+        elif choice == "6":
             display_productive_years()
+        elif choice.upper() == "EXIT":
+            sys.exit()
+
+# Equipment and Equipment Usage sub menu
+def crud_grant_publications():
+    # Loop display message waiting on user input
+    while True:
+        # Text
+        print("\n--- Research Lab Manager DBMS")
+        print("  --- Grant and Publication Reporting")
+        print("    --- CRUD Grant and Publications")
+        print("0. Back")
+        print("CG. Create Grant")
+        print("RG. Read Grant")
+        print("UG. Update Grant")
+        print("DG. Delete Grant")
+        print("CPC. Create Publication")
+        print("RPC. Read Publication")
+        print("UPC. Update Publication")
+        print("DPC. Delete Publication")
+        print("CPS. Create Publishes")
+        print("RPS. Read Publishes")
+        print("UPS. Update Publishes")
+        print("DPS. Delete Publishes")
+        print("Or type EXIT to exit.")
+
+        # Get Input
+        choice = input("Choose an option: ")
+
+        # Evaluate Input
+        if choice == "0":
+            break
+        elif choice.upper() == "CG":
+            create_table("`GRANT`")
+        elif choice.upper() == "RG":
+            read_table("`GRANT`")
+        elif choice.upper() == "UG":
+            update_table("`GRANT`")
+        elif choice.upper() == "DG":
+            delete_table("`GRANT`")
+        elif choice.upper() == "CPC":
+            create_table("PUBLICATION")
+        elif choice.upper() == "RPC":
+            read_table("PUBLICATION")
+        elif choice.upper() == "UPC":
+            update_table("PUBLICATION")
+        elif choice.upper() == "DPC":
+            delete_table("PUBLICATION")
+        elif choice.upper() == "CPS":
+            create_table("PUBLISHES")
+        elif choice.upper() == "RPS":
+            read_table("PUBLISHES")
+        elif choice.upper() == "UPS":
+            update_table("PUBLISHES")
+        elif choice.upper() == "DPS":
+            delete_table("PUBLISHES")
         elif choice.upper() == "EXIT":
             sys.exit()
 
