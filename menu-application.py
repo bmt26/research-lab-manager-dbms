@@ -630,12 +630,18 @@ def display_top_five_projects():
     print("    --- Top Five Projects")
 
     # Query and Display Results
-    print("(WIP)")
+    print("(PID, Title, Total Funding)")
     for row in query_db(
         """
-        SELECT true
-        FROM dual
-        WHERE false;
+        SELECT
+            p.PID,
+            p.TITLE AS project_title,
+            SUM(g.BUDGET) AS total_funding
+        FROM PROJECT p
+        JOIN `GRANT` g ON p.PID = g.PID
+        GROUP BY p.PID, p.TITLE
+        ORDER BY total_funding DESC
+        LIMIT 5;
         """
     ):
         print(row)
@@ -649,12 +655,27 @@ def display_top_mentor():
     print("    --- Display Top Mentors")
 
     # Query and Display Results
-    print("(WIP)")
+    print("(PID, MENTOR NAME, TOTAL MENTEE PUBLICATIONS)")
     for row in query_db(
         """
-        SELECT true
-        FROM dual
-        WHERE false;
+        WITH mentee_pub_counts AS (
+            SELECT
+                lm.MENTOR AS mentor_mid,
+                COUNT(pub.PUBID) AS total_publications
+            FROM LAB_MEMBER lm
+            JOIN PUBLISHES pub ON lm.MID = pub.MID
+            WHERE lm.MENTOR IS NOT NULL
+            GROUP BY lm.MENTOR
+        )
+        SELECT
+            mentor.MID,
+            mentor.NAME AS mentor_name,
+            mpc.total_publications
+        FROM mentee_pub_counts mpc
+        JOIN LAB_MEMBER mentor ON mpc.mentor_mid = mentor.MID
+        WHERE mpc.total_publications = (
+            SELECT MAX(total_publications) FROM mentee_pub_counts
+        );
         """
     ):
         print(row)
@@ -668,12 +689,18 @@ def display_student_publications():
     print("    --- Display Student Publications")
 
     # Query and Display Results
-    print("(WIP)")
+    print("MAJOR, PUBLICATION YEAR, TOTAL PUBLICATIONS")
     for row in query_db(
         """
-        SELECT true
-        FROM dual
-        WHERE false;
+        SELECT
+            s.MAJOR,
+            YEAR(pub.DATE) AS publication_year,
+            COUNT(DISTINCT pl.PUBID) AS total_publications
+        FROM STUDENT s
+        JOIN PUBLISHES pl ON s.MID = pl.MID
+        JOIN PUBLICATION pub ON pl.PUBID = pub.PUBID
+        GROUP BY s.MAJOR, YEAR(pub.DATE)
+        ORDER BY s.MAJOR, publication_year;
         """
     ):
         print(row)
@@ -724,12 +751,18 @@ def display_productive_years():
     print("    --- Display Productive Years")
 
     # Query and Display Results
-    print("(WIP)")
+    print("PUBLICATION YEAR, TOTAL PUBLICATIONS)")
     for row in query_db(
         """
-        SELECT true
-        FROM dual
-        WHERE false;
+        SELECT
+            YEAR(pub.DATE) AS publication_year,
+            COUNT(DISTINCT pl.PUBID) AS total_publications
+        FROM STUDENT s
+        JOIN PUBLISHES pl ON s.MID = pl.MID
+        JOIN PUBLICATION pub ON pl.PUBID = pub.PUBID
+        GROUP BY YEAR(pub.DATE)
+        ORDER BY total_publications DESC
+        LIMIT 3;
         """
     ):
         print(row)
@@ -841,7 +874,7 @@ def main_menu():
         elif choice.upper() == "T":
             #print(TABLE_TITLES)
             #function(input("Text: ").upper())
-            display_equipment_status()
+            display_top_mentor()
         elif choice.upper() == "EXIT":
             sys.exit()
 

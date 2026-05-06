@@ -16,16 +16,9 @@
       * Group By:
       * Having: Filter Group By (Seems complicated)
       * Aggregate Functions: Count, Sum, Avg, min, max
-  * Equipment Usage Tracking
-
-    * Equipment Status
   * Grant and Publication Reporting
 
-    * Top 5 Projects
-    * Mentor-Mentee Collaboration
-    * Student Publications
     * Completed Projects
-    * Productive Years
 * Cascading Update/Delete
 * Special Case for Labmember CRUD
 * Custom CRUD?
