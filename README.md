@@ -3,7 +3,13 @@
 ## ToDo:
 
 * Cascading Update/Delete
-* Special Case for Lab Member CRUD
+* Lab Member Crud
+
+  * Read
+  * Update
+  * Delete (Might Be Fixed with Cascade)
+
+
 
 
 
@@ -40,6 +46,4 @@ Menu
 > pip install mysql-connector-python
 
 > python menu-application.py
-
-
 

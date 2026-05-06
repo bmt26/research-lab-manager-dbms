@@ -261,8 +261,11 @@ def create_table(table_title):
         sub_table_structure = query_db("DESCRIBE " + sub_table_title)
         sub_values = [None] * len(sub_table_structure)
 
+        # Match MID across Lab Member and Subclass
+        sub_values[0] = values[0]
+
         # Loop Through each attribute
-        for i in range(len(sub_table_structure)):
+        for i in range(1, len(sub_table_structure)):
             # Loop through input options
             while True:
                 # Text
