@@ -2,7 +2,6 @@
 
 ## ToDo:
 
-* Add MENU Works to CRUD
 * Lab Member CRUD
 
   * Update - Filter by and Update Child Class Attributes
