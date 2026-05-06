@@ -221,9 +221,13 @@ def create_table(table_title):
 
     # Get Table Structure
     table_structure = query_db("DESCRIBE " + table_title)
-
-    # Declare variables
     values = [None] * len(table_structure)
+    sub_bool = False
+    sub_table_title = None
+    sub_table_structure = None
+    sub_values = None
+    sub_sql = None
+    sub_val = None
 
     print("Table Structure:")
     for row in table_structure:
@@ -249,11 +253,46 @@ def create_table(table_title):
                     values[i] = check_results[1]
                     break
 
+    # Check if attribute is Lab Member and Relevant Type (Student, Faculty, Collaborator)
+    if table_title == "LAB_MEMBER" and values[3] in ["Student", "Faculty", "Collaborator"]:
+        # Sub Table Variable Assignment
+        sub_bool = True
+        sub_table_title = values[3].upper()
+        sub_table_structure = query_db("DESCRIBE " + sub_table_title)
+        sub_values = [None] * len(sub_table_structure)
+
+        # Loop Through each attribute
+        for i in range(len(sub_table_structure)):
+            # Loop through input options
+            while True:
+                # Text
+                print(f"\nWhat do you want to set [{sub_table_structure[i][0]}: {sub_table_structure[i][1]}] to?")
+                print("Or press ENTER for NULL.")
+
+                # Get Input
+                choice = input("Choose an option: ")
+
+                # Evaluate Input
+                if choice == "":
+                    break
+                else:
+                    check_results = check_attribute_value_format(sub_table_structure[i][1], choice)
+                    if (check_results[0] == 1):
+                        sub_values[i] = check_results[1]
+                        break
+
+
     # Prepare Data Manipulation SQL and Val parameters
     table_format = "(" + ", ".join([inner[0] for inner in table_structure]) + ")"
     table_values = "(" + ", ".join(["%s"] * len(table_structure)) + ")"
     sql = f"INSERT INTO {table_title} {table_format} VALUES {table_values}"
     val = tuple(values)
+
+    if sub_bool:
+        sub_table_format = "(" + ", ".join([inner[0] for inner in sub_table_structure]) + ")"
+        sub_table_values = "(" + ", ".join(["%s"] * len(sub_table_structure)) + ")"
+        sub_sql = f"INSERT INTO {sub_table_title} {sub_table_format} VALUES {sub_table_values}"
+        sub_val = tuple(sub_values)
 
     # sql = "INSERT INTO users (name, age) VALUES (?, ?)"
     # values = ("Alice", 30)
@@ -264,6 +303,9 @@ def create_table(table_title):
         print(f"\nIs this correct?")
         print(f"sql = {sql}")
         print(f"val = {val}")
+        if sub_bool:
+            print(f"sql = {sub_sql}")
+            print(f"val = {sub_val}")
         print("y. Yes (Apply Creation)")
         print("n. No (Go back WITHOUT SAVING)")
         print("Or type EXIT to exit WITHOUT SAVING.")
@@ -283,6 +325,8 @@ def create_table(table_title):
 
     # Send Data Manipulation
     manipulate_db(sql, val)
+    if sub_bool:
+        manipulate_db(sub_sql, sub_val)
 
 # Read Function for all tables
 def read_table(table_title):
